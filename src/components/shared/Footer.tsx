@@ -3,7 +3,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { Envelope, Handset, MapPin, ArrowUpRightFromSquare } from "@gravity-ui/icons";
 
-const footerLinks = [
+interface footerLink {
+    label: string;
+    href: string;
+}
+interface footerArray {
+    heading: string;
+    links: footerLink[];
+}
+interface social {
+    label: string;
+    href: string;
+}
+const footerLinks: footerArray[] = [
     {
         heading: "Order",
         links: [
@@ -30,7 +42,7 @@ const footerLinks = [
     },
 ];
 
-const socials = [
+const socials:social[] = [
     { label: "Instagram", href: "https://instagram.com" },
     { label: "Facebook", href: "https://facebook.com" },
     { label: "TikTok", href: "https://tiktok.com" },

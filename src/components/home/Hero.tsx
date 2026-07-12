@@ -4,7 +4,7 @@ import { Button, Chip } from "@heroui/react";
 import { MapPin, Star, Clock, ArrowRight } from "@gravity-ui/icons";
 import Image from "next/image";
 
-const buildSteps = ["Base", "Sauce", "Cheese", "Veggies"];
+const buildSteps : string[] = ["Base", "Sauce", "Cheese", "Veggies"];
 
 export default function Hero() {
     return (

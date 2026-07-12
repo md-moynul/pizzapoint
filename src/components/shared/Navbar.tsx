@@ -7,7 +7,11 @@ import { Bars, Xmark, ShoppingCart } from "@gravity-ui/icons";
 import Image from "next/image";
 import Link from "next/link";
 
-const navItems = [
+interface navItem {
+  label: string;
+  href: string;
+}
+const navItems: navItem[] = [
   { label: "Menu", href: "/menu" },
   { label: "Build your pizza", href: "/build" },
   { label: "Track order", href: "/track" },
@@ -15,7 +19,7 @@ const navItems = [
 ];
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   // Scroll blocking when mobile menu is open
   useEffect(() => {
