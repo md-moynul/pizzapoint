@@ -14,20 +14,42 @@ import {
   Button,
 } from "@heroui/react";
 import { Envelope, LockOpen, Eye, EyeSlash, MapPin, Star, Clock } from "@gravity-ui/icons";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    console.log({
-      email: formData.get("email"),
-      password: formData.get("password"),
-      remember: formData.get("remember"),
-    });
-    // TODO: wire up to auth (JWT) endpoint
+    const email: string = formData.get("email") as string;
+    const password: string = formData.get("password") as string;
+    const remember: boolean = formData.get("remember") as string ? true : false;
+    console.log(email, password, remember);
+    const { data, error } = await authClient.signIn.email({
+      email,
+      password,
+      rememberMe: remember,
+    },)
+    if(data?.token){
+      toast.success("Login successful");
+      router.push("/");
+    }
+    if(error){
+      toast.error(`Login failed 
+        because ${error.message}
+        `);
+    }
   };
+  const handleGoogleSignup = async () => {
+    toast.info("you will back social login");
+    const data = await authClient.signIn.social({
+    provider: "google",
+  });
+}
 
   return (
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-2">
@@ -140,10 +162,14 @@ export default function SignInPage() {
               <FieldError className="text-xs text-primary" />
             </TextField>
 
-            <label className="flex items-center gap-2 text-sm text-text-muted">
-              <Checkbox name="remember" />
-              Remember me
-            </label>
+            <Checkbox name="remember">
+              <Checkbox.Content>
+                <Checkbox.Control className="border-2 border-accent data-selected:border-accent data-selected:bg-accent">
+                  <Checkbox.Indicator />
+                </Checkbox.Control>
+                <span className="text-sm text-text-muted">Remember me</span>
+              </Checkbox.Content>
+            </Checkbox>
 
             <Button
               type="submit"
@@ -160,6 +186,7 @@ export default function SignInPage() {
           </div>
 
           <Button
+            onPress={handleGoogleSignup}
             className="mt-6 w-full rounded-xl border-border py-2.5 text-sm font-medium text-text bg-backdrop/10"
           >
             Continue with Google

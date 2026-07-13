@@ -25,13 +25,16 @@ import {
   Star,
   Clock,
 } from "@gravity-ui/icons";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-
+  const router = useRouter();
   const uploadToImgbb = async (file: File) => {
     setIsUploading(true);
     try {
@@ -72,22 +75,40 @@ export default function SignUpPage() {
     if (avatarFile) {
       imageUrl = (await uploadToImgbb(avatarFile)) || "";
     }
-
     const formData = new FormData(form);
-    console.log({
-      avatar: imageUrl,
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      password: formData.get("password"),
-      terms: formData.get("terms"),
+    const image: string = imageUrl;
+    const name: string = formData.get("name") as string;;
+    const email: string = formData.get("email") as string;;
+    const phone: string = formData.get("phone") as string;;
+    const password: string = formData.get("password") as string;;
+    console.log(name, email, phone, password, image);
+
+    const { data, error } = await authClient.signUp.email({
+      email, // user email address
+      password, // user password -> min 8 characters by default
+      name, // user display name
+      image, // User image URL (optional)
+      number: phone,
+      callbackURL: "/dashboard" // A URL to redirect to after the user verifies their email (optional)
+
     });
-    // TODO: POST to /auth/register with the collected fields + imageUrl
+    console.log(data , error);
+    if(data?.token){
+    toast.success("Account created successfully");
+      router.push("/");
+    }
+    if(error){
+      toast.error(`Account creation failed 
+        because ${error.message}
+        `);
+    }
   };
 
-  const handleGoogleSignup = () => {
-    // TODO: wire up to your OAuth flow, e.g. redirect to /auth/google
-    console.log("Continue with Google clicked");
+  const handleGoogleSignup = async () => {
+    toast.info("you will back social login");
+    const data = await authClient.signIn.social({
+    provider: "google",
+  });
   };
 
   return (
@@ -208,7 +229,7 @@ export default function SignUpPage() {
             <Checkbox name="terms" isRequired>
               <Checkbox.Content>
                 <Checkbox.Control className="border-2 border-accent data-selected:bg-accent data-selected:border-accent">
-                  <Checkbox.Indicator  />
+                  <Checkbox.Indicator />
                 </Checkbox.Control>
                 <span className="text-sm text-text-muted">
                   I agree to the{" "}
