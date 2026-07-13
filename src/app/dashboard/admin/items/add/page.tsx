@@ -1,0 +1,279 @@
+// app/dashboard/admin/items/add/page.tsx
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import {
+  Form,
+  TextField,
+  Label,
+  Input,
+  FieldError,
+  Button,
+} from "@heroui/react";
+import {  CircleDollar, Star, Picture } from "@gravity-ui/icons";
+
+const cheeseOptions = ["Mozzarella", "Cheddar", "Parmesan"];
+
+export default function AddPizzaPage() {
+  const [category, setCategory] = useState<"veg" | "non-veg">("veg");
+  const [selectedCheeses, setSelectedCheeses] = useState<string[]>([]);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const toggleCheese = (name: string) => {
+    setSelectedCheeses((prev) =>
+      prev.includes(name) ? prev.filter((c) => c !== name) : [...prev, name]
+    );
+  };
+
+  const uploadToImgbb = async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await fetch(
+      `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`,
+      { method: "POST", body: formData }
+    );
+    const data = await res.json();
+    return data.success ? (data.data.url as string) : null;
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImagePreview(URL.createObjectURL(file));
+    setUploadError(null);
+    setIsUploading(true);
+
+    try {
+      const url = await uploadToImgbb(file);
+      if (!url) throw new Error("Upload failed");
+      setImageUrl(url);
+    } catch {
+      setUploadError("Couldn't upload image. Try again.");
+      setImageUrl(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!imageUrl) {
+      setUploadError("Please add a pizza photo before saving.");
+      return;
+    }
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    console.log({
+      title: formData.get("title"),
+      shortDescription: formData.get("shortDescription"),
+      fullDescription: formData.get("fullDescription"),
+      price: formData.get("price"),
+      rating: formData.get("rating"),
+      category,
+      cheeses: selectedCheeses,
+      imageUrl,
+    });
+    // TODO: POST to /admin/pizzas
+  };
+
+  return (
+    <div className="flex-1 px-6 py-8 md:px-10 mx-auto flex max-w-4xl flex-col gap-5">
+      <div>
+        <h1 className="font-display text-2xl font-bold text-text">Add pizza</h1>
+        <p className="mt-1 text-sm text-text-muted">
+          Create a new pizza with its details, cheese type, and photo.
+        </p>
+      </div>
+
+      <Form
+        onSubmit={handleSubmit}
+        className="mt-8 flex max-w-4xl flex-col gap-5"
+      >
+        {/* Image upload — mandatory */}
+        <div className="flex flex-col items-center gap-3">
+          <label
+            htmlFor="pizzaImage"
+            className={`relative flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed bg-surface hover:border-primary ${
+              uploadError && !imageUrl ? "border-primary" : "border-border"
+            }`}
+          >
+            {imagePreview ? (
+              <Image
+                src={imagePreview}
+                alt="Pizza preview"
+                fill
+                className={`object-cover ${isUploading ? "opacity-50" : ""}`}
+              />
+            ) : (
+              <Picture className="h-6 w-6 text-text-muted" />
+            )}
+            {isUploading && (
+              <span className="absolute inset-0 flex items-center justify-center bg-text/30">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-bg border-t-transparent" />
+              </span>
+            )}
+          </label>
+          <input
+            id="pizzaImage"
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="hidden"
+          />
+          <p className="text-xs text-text-muted">
+            {isUploading
+              ? "Uploading..."
+              : imageUrl
+                ? "Image uploaded"
+                : "Add a pizza photo *"}
+          </p>
+          {uploadError && <p className="text-xs text-primary">{uploadError}</p>}
+        </div>
+
+        <TextField name="title" type="text" isRequired className="flex flex-col gap-1.5">
+          <Label className="text-sm font-medium text-text">Pizza name</Label>
+          <div className="relative">
+            <Input
+              placeholder="e.g. Chicken Paradise"
+              className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none"
+            />
+          </div>
+          <FieldError className="text-xs text-primary" />
+        </TextField>
+
+        <TextField
+          name="shortDescription"
+          type="text"
+          isRequired
+          maxLength={120}
+          className="flex flex-col gap-1.5"
+        >
+          <Label className="text-sm font-medium text-text">Short description</Label>
+          <Input
+            placeholder="1-2 line teaser shown on the menu card"
+            className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none"
+          />
+          <FieldError className="text-xs text-primary" />
+        </TextField>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="fullDescription" className="text-sm font-medium text-text">
+            Full description
+          </label>
+          <textarea
+            id="fullDescription"
+            name="fullDescription"
+            required
+            rows={4}
+            placeholder="Ingredients, taste notes, what makes it special..."
+            className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-5">
+          <TextField name="price" type="number" isRequired className="flex flex-col gap-1.5">
+            <Label className="text-sm font-medium text-text">Price </Label>
+            <div className="relative">
+              <CircleDollar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+              <Input
+                placeholder="450"
+                min={0}
+                className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none"
+              />
+            </div>
+            <FieldError className="text-xs text-primary" />
+          </TextField>
+
+          <TextField name="rating" type="number" className="flex flex-col gap-1.5">
+            <Label className="text-sm font-medium text-text">Rating (optional)</Label>
+            <div className="relative">
+              <Star className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+              <Input
+                placeholder="4.5"
+                min={0}
+                max={5}
+                step={0.1}
+                className="w-full rounded-xl border border-border bg-surface py-2.5 pl-10 pr-3 text-sm text-text placeholder:text-text-muted focus:border-primary focus:outline-none"
+              />
+            </div>
+          </TextField>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-text">Category</span>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setCategory("veg")}
+              className={`rounded-xl border px-4 py-2 text-sm font-medium ${
+                category === "veg"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-text-muted"
+              }`}
+            >
+              Veg
+            </button>
+            <button
+              type="button"
+              onClick={() => setCategory("non-veg")}
+              className={`rounded-xl border px-4 py-2 text-sm font-medium ${
+                category === "non-veg"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-text-muted"
+              }`}
+            >
+              Non-Veg
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-text">Cheese</span>
+          <div className="flex flex-wrap gap-2">
+            {cheeseOptions.map((cheese) => {
+              const isSelected = selectedCheeses.includes(cheese);
+              return (
+                <button
+                  key={cheese}
+                  type="button"
+                  onClick={() => toggleCheese(cheese)}
+                  className={`rounded-full border px-4 py-1.5 text-sm font-medium ${
+                    isSelected
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-text-muted"
+                  }`}
+                >
+                  {cheese}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-2 flex justify-end gap-3">
+          <Button
+            type="button"
+            className="rounded-xl border-border px-6 text-text bg-background"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            isDisabled={isUploading || !imageUrl}
+            className="rounded-xl bg-primary px-6 font-semibold text-white"
+          >
+            {isUploading ? "Uploading..." : "Save pizza"}
+          </Button>
+        </div>
+      </Form>
+    </div>
+  );
+}
