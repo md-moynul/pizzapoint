@@ -32,3 +32,7 @@ export const protectedMutation = async (path: string, data :object, token : stri
     return res.json();
 };
 
+export const serverFetch = async (path :string) => {
+    const res = await fetch(`${baseUrl}${path}`);
+    return res.json();
+};

@@ -72,7 +72,8 @@ export default function AddPizzaPage() {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-    const data = {      
+    const data = {    
+      name: formData.get("name"),  
       shortDescription: formData.get("shortDescription"),
       fullDescription: formData.get("fullDescription"),
       price: formData.get("price"),
@@ -144,7 +145,7 @@ export default function AddPizzaPage() {
           {uploadError && <p className="text-xs text-primary">{uploadError}</p>}
         </div>
 
-        <TextField name="title" type="text" isRequired className="flex flex-col gap-1.5">
+        <TextField name="name" type="text" isRequired className="flex flex-col gap-1.5">
           <Label className="text-sm font-medium text-text">Pizza name</Label>
           <div className="relative">
             <Input
