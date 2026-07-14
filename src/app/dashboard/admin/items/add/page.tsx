@@ -12,6 +12,8 @@ import {
   Button,
 } from "@heroui/react";
 import {  CircleDollar, Star, Picture } from "@gravity-ui/icons";
+import { postPizza } from "@/lib/action/pizza";
+import { toast } from "react-toastify";
 
 const cheeseOptions = ["Mozzarella", "Cheddar", "Parmesan"];
 
@@ -60,7 +62,7 @@ export default function AddPizzaPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!imageUrl) {
@@ -70,9 +72,7 @@ export default function AddPizzaPage() {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
-
-    console.log({
-      title: formData.get("title"),
+    const data = {      
       shortDescription: formData.get("shortDescription"),
       fullDescription: formData.get("fullDescription"),
       price: formData.get("price"),
@@ -80,8 +80,14 @@ export default function AddPizzaPage() {
       category,
       cheeses: selectedCheeses,
       imageUrl,
-    });
-    // TODO: POST to /admin/pizzas
+    }
+    console.log(data)
+    const res = await postPizza(data)
+    console.log(res)
+    if (res.insertedId) {
+      toast.success("Pizza added successfully")
+      form.reset()
+    }
   };
 
   return (

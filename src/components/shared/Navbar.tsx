@@ -28,6 +28,7 @@ export default function Navbar() {
     ...baseNavItems,
     user && { label: "Build your pizza", href: "/build" },
     { label: "Track order", href: "/track" },
+    { label: "Dashboard", href: "/dashboard/admin" },
   ].filter(Boolean) as navItem[];
 
   // Scroll blocking when mobile menu is open
