@@ -16,7 +16,7 @@ export interface Pizza {
 
 export default function PizzaCard({ pizza }: { pizza: Pizza }) {
   return (
-    <div className="group overflow-hidden rounded-2xl border border-border bg-surface transition-shadow hover:shadow-lg">
+    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-shadow hover:shadow-lg">
       <div className="relative h-44 w-full overflow-hidden bg-bg">
         <Image
           src={pizza.imageUrl}
@@ -27,7 +27,7 @@ export default function PizzaCard({ pizza }: { pizza: Pizza }) {
         <span
           className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-medium ${
             pizza.category === "veg"
-              ? "bg-accent text-text"
+              ? "bg-accent text-white"
               : "bg-primary text-white"
           }`}
         >
@@ -35,7 +35,7 @@ export default function PizzaCard({ pizza }: { pizza: Pizza }) {
         </span>
       </div>
 
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-2">
           <p className="line-clamp-1 font-display text-base font-bold text-text">
             {pizza.name}
@@ -60,7 +60,7 @@ export default function PizzaCard({ pizza }: { pizza: Pizza }) {
           ))}
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-auto flex items-center justify-between pt-3">
           <p className="font-mono text-lg font-bold text-primary">
             ৳{pizza.price}
           </p>
