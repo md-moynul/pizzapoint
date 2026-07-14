@@ -13,7 +13,7 @@ export const serverMutation = async (path: string, data: object, method: string 
     });
     return res.json();
 };
-export const protectedMutation = async (path: string, data :object, token : string, method: string = 'POST') => {
+export const protectedMutation = async (path: string, data :object | null, token : string, method: string = 'POST') => {
     const res = await fetch(`${baseUrl}${path}`, {
         method: method,
         headers: {

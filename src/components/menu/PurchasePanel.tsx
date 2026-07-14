@@ -7,6 +7,7 @@ import { Button } from "@heroui/react";
 import { Plus, Minus } from "@gravity-ui/icons";
 import { SIZE_OPTIONS, getSizePrice } from "@/lib/constants/pricing";
 import { addToCart } from "@/lib/action/cart";
+import { toast } from "react-toastify";
 
 interface Pizza {
     _id: string;
@@ -62,7 +63,11 @@ export default function PurchasePanel({ pizza ,userId }: { pizza: Pizza , userId
                 pizzaId: pizza._id,
             };
             const res = await addToCart(cartData);
-            console.log(res);
+            if (res.success) {
+                toast.success("Pizza added to cart successfully")
+            } else {
+                toast.error("Failed to add pizza to cart")
+            }
         } finally {
             setIsAdding(false);
         }
