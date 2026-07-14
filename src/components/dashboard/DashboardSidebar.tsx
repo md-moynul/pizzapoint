@@ -52,13 +52,13 @@ export default function DashboardSidebar({ user, cartCount = 0 }: DashboardSideb
     ];
 
     const customerNavItems: NavItem[] = [
-        { icon: LayoutCellsLarge, label: "Overview", href: "/dashboard" },
-        { icon: Box, label: "My Orders", href: "/dashboard/orders" },
-        { icon: ListCheck, label: "Track Order", href: "/dashboard/orders/track" },
-        { icon: ShoppingCart, label: "Cart", href: "/cart", badge: cartCount },
-        { icon: Bell, label: "Notifications", href: "/dashboard/notifications" },
+        { icon: LayoutCellsLarge, label: "Overview", href: "/dashboard/user" },
+        { icon: Box, label: "My Orders", href: "/dashboard/user/orders" },
+        { icon: ListCheck, label: "Track Order", href: "/dashboard/user/order" },
+        { icon: ShoppingCart, label: "Cart", href: "/dashboard/user/cart" },
+        { icon: Bell, label: "Notifications", href: "/dashboard/user/alerts" },
         { icon: Person, label: "Profile", href: "/dashboard/profile" },
-        { icon: Gear, label: "Settings", href: "/dashboard/settings" },
+        { icon: Gear, label: "Settings", href: "/dashboard/user/settings" },
     ];
 
     const navItems = isAdmin ? adminNavItems : customerNavItems;
