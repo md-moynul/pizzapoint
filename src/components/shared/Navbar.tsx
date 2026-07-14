@@ -7,6 +7,7 @@ import { Bars, Xmark, ShoppingCart, LayoutHeader, ArrowRightFromSquare } from "@
 import Image from "next/image";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
 
 interface navItem {
   label: string;
@@ -16,6 +17,7 @@ interface navItem {
 const baseNavItems: navItem[] = [
   { label: "Menu", href: "/menu" },
   { label: "About", href: "/about" },
+  { label: "Contact Us", href: "/contact" },
 ];
 
 export default function Navbar() {
@@ -53,6 +55,7 @@ export default function Navbar() {
   const handleLogout = async() => {
    await authClient.signOut()
     setIsProfileOpen(false);
+    redirect('/')
   };
 
   const navEnd = (

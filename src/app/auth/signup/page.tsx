@@ -89,6 +89,7 @@ export default function SignUpPage() {
       name, // user display name
       image, // User image URL (optional)
       number: phone,
+      role: "user",
       callbackURL: "/dashboard" // A URL to redirect to after the user verifies their email (optional)
 
     });
