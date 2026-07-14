@@ -3,7 +3,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import {
     LayoutSideContentLeft,
     LayoutCellsLarge,
@@ -13,10 +13,10 @@ import {
     ListCheck,
     Bell,
     Person,
-    Gear,
     ArrowRightFromSquare,
 } from "@gravity-ui/icons";
 import { Button, Drawer } from "@heroui/react";
+import { authClient } from "@/lib/auth-client";
 
 interface DashboardSidebarProps {
     user?: {
@@ -52,16 +52,20 @@ export default function DashboardSidebar({ user, cartCount = 0 }: DashboardSideb
     ];
 
     const customerNavItems: NavItem[] = [
-        { icon: LayoutCellsLarge, label: "Overview", href: "/dashboard/user" },
-        { icon: Box, label: "My Orders", href: "/dashboard/user/orders" },
-        { icon: ListCheck, label: "Track Order", href: "/dashboard/user/order" },
+        // { icon: LayoutCellsLarge, label: "Overview", href: "/dashboard/user" },
+        // { icon: Box, label: "My Orders", href: "/dashboard/user/orders" },
+        // { icon: ListCheck, label: "Track Order", href: "/dashboard/user/order" },
         { icon: ShoppingCart, label: "Cart", href: "/dashboard/user/cart" },
-        { icon: Bell, label: "Notifications", href: "/dashboard/user/alerts" },
+        // { icon: Bell, label: "Notifications", href: "/dashboard/user/alerts" },
         { icon: Person, label: "Profile", href: "/dashboard/profile" },
-        { icon: Gear, label: "Settings", href: "/dashboard/user/settings" },
+        // { icon: Gear, label: "Settings", href: "/dashboard/user/settings" },
     ];
 
     const navItems = isAdmin ? adminNavItems : customerNavItems;
+    const handleLogout = async () => {
+        await authClient.signOut();
+        redirect('/');
+    };
 
     // `onLinkClick` lets us close the drawer on mobile when a nav item is tapped.
     const renderNavLinks = (onLinkClick?: () => void) => (
@@ -105,15 +109,15 @@ export default function DashboardSidebar({ user, cartCount = 0 }: DashboardSideb
             })}
 
             {!isAdmin && (
-                <Link href="/logout" onClick={onLinkClick}>
-                    <button
-                        type="button"
-                        className="mt-2 flex w-full items-center gap-3.5 rounded-xl px-4 py-3 text-left text-sm font-medium text-text-muted transition-all hover:bg-surface hover:text-primary"
-                    >
-                        <ArrowRightFromSquare className="h-5 w-5" />
-                        <span>Logout</span>
-                    </button>
-                </Link>
+
+                <button
+                    onClick={handleLogout}
+                    type="button"
+                    className="mt-2 flex w-full items-center gap-3.5 rounded-xl px-4 py-3 text-left text-sm font-medium text-text-muted transition-all hover:bg-surface hover:text-primary cursor-pointer"
+                >
+                    <ArrowRightFromSquare className="h-5 w-5" />
+                    <span>Logout</span>
+                </button>
             )}
         </nav>
     );

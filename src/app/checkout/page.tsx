@@ -1,0 +1,11 @@
+import React from 'react';
+
+const page = () => {
+    return (
+        <div className="mx-auto max-w-5xl px-6 py-10 min-h-screen">
+            <p  className="text-4xl font-bold text-primary"> this feature will be available soon</p>
+        </div>
+    );
+};
+
+export default page;

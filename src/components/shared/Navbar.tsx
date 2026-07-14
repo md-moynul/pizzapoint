@@ -14,6 +14,14 @@ interface navItem {
   href: string;
 }
 
+interface CustomUser {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role?: string; // admin, user ইত্যাদি
+}
+
 const baseNavItems: navItem[] = [
   { label: "Menu", href: "/menu" },
   { label: "About", href: "/about" },
@@ -24,14 +32,18 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  const user = sessionsClient().session?.user;
+  
+  const user = sessionsClient().session?.user as CustomUser | undefined;
 
+  
   const navItems: navItem[] = [
     ...baseNavItems,
-    user && { label: "Build your pizza", href: "/build" },
-    { label: "Track order", href: "/track" },
-    { label: "Dashboard", href: "/dashboard/admin" },
-  ].filter(Boolean) as navItem[];
+    ...(user && user.role !== "admin" ? [{ label: "Cart", href: "/dashboard/user/cart" },{ label: "profile", href: "/dashboard/profile" }] : []),
+    ...(user?.role === "admin" 
+      ? [{ label: "Dashboard", href: `/dashboard/${user.role}` },{ label: "profile", href: "/dashboard/profile" }] 
+      : []
+    ),
+  ];
 
   // Scroll blocking when mobile menu is open
   useEffect(() => {
@@ -53,9 +65,9 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async() => {
-   await authClient.signOut()
+    await authClient.signOut();
     setIsProfileOpen(false);
-    redirect('/')
+    redirect('/');
   };
 
   const navEnd = (
@@ -78,14 +90,17 @@ export default function Navbar() {
 
           {isProfileOpen && (
             <div className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
-              <Link
-                href="/dashboard"
-                onClick={() => setIsProfileOpen(false)}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm text-text hover:bg-bg"
-              >
-                <LayoutHeader className="h-4 w-4" />
-                Dashboard
-              </Link>
+              {/* প্রোফাইল ড্রপডাউনেও ড্যাশবোর্ড লিঙ্কটি কেবল অ্যাডমিন দেখবে */}
+              {user?.role === "admin" && (
+                <Link
+                  href={`/dashboard/${user.role}`}
+                  onClick={() => setIsProfileOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-text hover:bg-bg"
+                >
+                  <LayoutHeader className="h-4 w-4" />
+                  Dashboard
+                </Link>
+              )}
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-primary hover:bg-bg"
@@ -148,15 +163,18 @@ export default function Navbar() {
 
         {/* Right content */}
         <div className="hidden items-center gap-3 md:flex">
-          <button
-            aria-label="Cart"
-            className="relative rounded-full border border-border p-2 hover:border-text"
-          >
-            <ShoppingCart className="h-4 w-4 text-text" />
-            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-white">
-              0
-            </span>
-          </button>
+          {/* Cart Button: এটি শুধুমাত্র তখনই দেখাবে যখন ইউজার লগইন করা থাকবে এবং সে admin হবে না (অর্থাৎ সাধারণ কাস্টমার) */}
+          {user?.role !== "admin" && (
+            <button
+              aria-label="Cart"
+              className="relative rounded-full border border-border p-2 hover:border-text"
+            >
+              <ShoppingCart className="h-4 w-4 text-text" />
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-white">
+                0
+              </span>
+            </button>
+          )}
           {navEnd}
         </div>
       </header>
