@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-// components/menu/MenuBrowser.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -39,7 +38,6 @@ export default function MenuBrowser({
     initialMaxPrice,
   ]);
 
-  // Push a full set of filters into the URL, dropping defaults to keep it clean
   const applyFilters = (next: {
     search?: string;
     category?: string;
@@ -50,10 +48,14 @@ export default function MenuBrowser({
     const nextCategory = next.category ?? category;
     const [min, max] = next.priceRange ?? priceRange;
 
+    
+    params.delete("page");
     nextSearch ? params.set("q", nextSearch) : params.delete("q");
+    
     nextCategory && nextCategory !== "all"
       ? params.set("category", nextCategory)
       : params.delete("category");
+      
     min > 0 ? params.set("minPrice", String(min)) : params.delete("minPrice");
     max < MAX_PRICE
       ? params.set("maxPrice", String(max))
@@ -62,7 +64,6 @@ export default function MenuBrowser({
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  // Debounce the search box so we don't push a route change on every keystroke
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (search !== initialSearch) {
@@ -85,7 +86,7 @@ export default function MenuBrowser({
 
   return (
     <div className="mt-8 grid grid-cols-1 gap-5 rounded-2xl border border-border bg-surface p-5 md:grid-cols-[1.5fr_1fr_1.5fr]">
-      {/* Search */}
+      {/* Search Input */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="pizza-search" className="text-sm font-medium text-text">
           Search
@@ -102,7 +103,7 @@ export default function MenuBrowser({
         </div>
       </div>
 
-      {/* Category filter */}
+      {/* Category Select */}
       <Select
         selectedKey={category}
         onSelectionChange={(key) => handleCategoryChange(String(key))}
@@ -126,7 +127,7 @@ export default function MenuBrowser({
         </Select.Popover>
       </Select>
 
-      {/* Price range filter — only pushes the URL once the user lets go of the thumb */}
+      {/* Price Slider */}
       <Slider
         className="flex flex-col gap-1.5"
         value={priceRange}

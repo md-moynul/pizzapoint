@@ -1,7 +1,8 @@
-// app/menu/page.tsx
 import { getAllPizzas } from "@/lib/api/pizza";
 import MenuBrowser from "@/components/menu/MenuBrowser";
 import PizzaCard, { type Pizza } from "@/components/menu/PizzaCard";
+import PizzaPagination from "@/components/home/Pagination";
+
 
 interface MenuPageProps {
   searchParams: Promise<{
@@ -9,18 +10,38 @@ interface MenuPageProps {
     category?: string;
     minPrice?: string;
     maxPrice?: string;
+    page?: string; // পেজ নাম্বার রিসিভ করার জন্য
   }>;
 }
 
 export default async function MenuPage({ searchParams }: MenuPageProps) {
-  const { q, category, minPrice, maxPrice } = await searchParams;
+  const { q, category, minPrice, maxPrice, page } = await searchParams;
 
-  const pizzas: Pizza[] = await getAllPizzas({
+  // বর্তমান পেজ নাম্বার বের করা (ডিফল্ট ১)
+  const currentPage = parseInt(page || "1", 10);
+  const limit = 8; // প্রতি পেজে ৮টি পিজ্জা দেখাবে
+
+  // এপিআই কল করা
+  const response = await getAllPizzas({
     q,
     category,
     minPrice,
     maxPrice,
+    page: currentPage,
+    limit,
   });
+
+  // ডাটা এবং প্যাগিনেশন অবজেক্ট আলাদা করা
+  const pizzas: Pizza[] = response.data || [];
+  const totalPages = response.pagination?.totalPages || 1;
+
+  // বর্তমান সার্চ বা অন্যান্য ফিল্টার প্যারামিটারগুলো ধরে রাখার জন্য স্ট্রিং তৈরি করা
+  const sp = new URLSearchParams();
+  if (q) sp.set("q", q);
+  if (category) sp.set("category", category);
+  if (minPrice) sp.set("minPrice", minPrice);
+  if (maxPrice) sp.set("maxPrice", maxPrice);
+  const paramsStr = sp.toString();
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -43,11 +64,21 @@ export default async function MenuPage({ searchParams }: MenuPageProps) {
           No pizzas match your filters.
         </p>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {pizzas.map((pizza) => (
-            <PizzaCard key={pizza._id} pizza={pizza} />
-          ))}
-        </div>
+        <>
+          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {pizzas.map((pizza) => (
+              <PizzaCard key={pizza._id} pizza={pizza} />
+            ))}
+          </div>
+
+         
+          <PizzaPagination
+            page={currentPage}
+            totalPages={totalPages}
+            paramsStr={paramsStr} 
+            link="/menu"
+          />
+        </>
       )}
     </div>
   );

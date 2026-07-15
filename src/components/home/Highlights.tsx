@@ -1,24 +1,22 @@
-// components/home/Highlights.tsx
 import Link from "next/link";
 import PizzaCard, { type Pizza } from "@/components/menu/PizzaCard";
 import { Button } from "@heroui/react";
+import { getLovedPizzas } from "@/lib/api/pizza";
+import PizzaPagination from "./Pagination";
 
-// TODO: replace with a real fetch, e.g. GET /pizzas?featured=true&limit=3
-const featuredPizzas: Pizza[] = [
-  {
-    _id: "6a55fe2070a1df95c84495c3",
-    name: "Chicken Paradise",
-    category: "non-veg",
-    cheeses: ["Mozzarella", "Cheddar"],
-    shortDescription: "Grilled chicken, smoky BBQ sauce, red onion",
-    imageUrl:
-      "https://i.ibb.co/zTBSZwj5/tasty-italian-classic-original-pepperoni-pizza-top-view-tasty-italian-classic-original-pepperoni-piz.webp",
-    price: "450",
-    rating: "4.8",
-  },
-];
+interface HighlightsProps {
+  searchParams?: { page?: string; limit?: string };
+}
 
-export default function Highlights() {
+export default async function Highlights({ searchParams }: HighlightsProps) {
+  const currentPage = parseInt(searchParams?.page || "1", 10);
+  const limit = 4;
+
+  const response = await getLovedPizzas(currentPage, limit);
+  
+  const featuredPizzas: Pizza[] = response.data || [];
+  const totalPages = response.pagination?.totalPages || 1;
+
   return (
     <section className="px-6 py-16 md:py-20">
       <div className="mx-auto max-w-6xl">
@@ -38,11 +36,19 @@ export default function Highlights() {
           </Link>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Grid Layout */}
+        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {featuredPizzas.map((pizza) => (
             <PizzaCard key={pizza._id} pizza={pizza} />
           ))}
         </div>
+
+        {/* Dynamic Pizza Pagination Component call */}
+        <PizzaPagination 
+          page={currentPage} 
+          totalPages={totalPages} 
+          link="/"
+        />
       </div>
     </section>
   );
