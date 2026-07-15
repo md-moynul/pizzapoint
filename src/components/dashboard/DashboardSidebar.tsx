@@ -56,6 +56,7 @@ export default function DashboardSidebar({ user, cartCount = 0 }: DashboardSideb
         // { icon: LayoutCellsLarge, label: "Overview", href: "/dashboard/user" },
         // { icon: Box, label: "My Orders", href: "/dashboard/user/orders" },
         // { icon: ListCheck, label: "Track Order", href: "/dashboard/user/order" },
+         { icon: Plus, label: "Build Pizza", href: "/dashboard/user/build" },
         { icon: ShoppingCart, label: "Cart", href: "/dashboard/user/cart" },
         // { icon: Bell, label: "Notifications", href: "/dashboard/user/alerts" },
         { icon: Person, label: "Profile", href: "/dashboard/profile" },

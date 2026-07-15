@@ -57,7 +57,7 @@ export default function Navbar() {
 
   const navItems: navItem[] = [
     ...baseNavItems,
-    ...(user && user.role !== "admin" ? [{ label: "Cart", href: "/dashboard/user/cart" }, { label: "profile", href: "/dashboard/profile" }] : []),
+    ...(user && user.role !== "admin" ? [{ label: "Cart", href: "/dashboard/user/cart" }, { label: "profile", href: "/dashboard/profile" } , { label: "Build your pizza", href: "/dashboard/user/build" }] : []),
     ...(user?.role === "admin"
       ? [{ label: "Dashboard", href: `/dashboard/${user.role}` }, { label: "profile", href: "/dashboard/profile" }]
       : []
