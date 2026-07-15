@@ -14,6 +14,7 @@ import {
 import {  CircleDollar, Star, Picture } from "@gravity-ui/icons";
 import { postPizza } from "@/lib/action/pizza";
 import { toast } from "react-toastify";
+import { redirect } from "next/navigation";
 
 const cheeseOptions = ["Mozzarella", "Cheddar", "Parmesan"];
 
@@ -82,12 +83,11 @@ export default function AddPizzaPage() {
       cheeses: selectedCheeses,
       imageUrl,
     }
-    console.log(data)
     const res = await postPizza(data)
-    console.log(res)
     if (res.insertedId) {
       toast.success("Pizza added successfully")
       form.reset()
+      redirect("/dashboard/admin/items")
     }
   };
 

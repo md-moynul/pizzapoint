@@ -3,7 +3,8 @@ import { getAllPizzas } from "@/lib/api/pizza";
 import ItemsTable from "@/components/dashboard/ItemsTable";
 
 const AllItemsPage = async () => {
-  const pizzas = await getAllPizzas();
+  const pizza = await getAllPizzas();
+  const pizzas = pizza.data || [];
 
   return (
     <div className="flex-1 px-6 py-8 md:px-10">

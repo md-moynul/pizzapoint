@@ -11,27 +11,27 @@ import {
   TextField,
   FieldError,
 } from "@heroui/react";
-import { Pencil, Person, Camera } from "@gravity-ui/icons";
+import { Pencil, Person, Camera } from "@gravity-ui/icons"; 
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 
-// কাস্টম ইন্টারফেস (TypeScript-এর জন্য)
 interface UserProfile {
   name?: string | null;
   image?: string | null;
+  number?: string | null; 
 }
 
 interface EditProfileDialogProps {
   user: UserProfile | null | undefined;
 }
 
-// থিম স্টাইলিং ক্লাসেস
 const fieldBg = "bg-[#FFF9F2] dark:bg-background";
 const fieldClass = `rounded-xl border-[#EAE0D3] dark:border-[#3A332A] ${fieldBg} text-[#2B2420] dark:text-[#F4EDE4] placeholder:text-[#9C9388] focus-visible:border-[#E85D3D] focus-visible:ring-[#E85D3D]/20`;
 const labelClass = "text-sm font-medium text-[#2B2420] dark:text-[#F4EDE4]";
 
 export default function EditProfileDialog({ user }: EditProfileDialogProps) {
   const [name, setName] = useState<string>(user?.name ?? "");
+  const [phone, setPhone] = useState<string>(user?.number ?? ""); 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.image ?? null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -85,9 +85,11 @@ export default function EditProfileDialog({ user }: EditProfileDialogProps) {
         }
       }
 
+      // FIX: Change 'number: phone' to 'phoneNumber: phone'
       const { data, error: updateError } = await authClient.updateUser({
         image: finalImageUrl,
         name,
+        number: phone, 
       });
 
       if (data) {
@@ -109,7 +111,6 @@ export default function EditProfileDialog({ user }: EditProfileDialogProps) {
 
   return (
     <AlertDialog>
-      {/* Trigger Button */}
       <Button
         className="flex items-center gap-1.5 rounded-xl border bg-[#E85D3D] text-white"
       >
@@ -138,6 +139,7 @@ export default function EditProfileDialog({ user }: EditProfileDialogProps) {
                     className="mt-2 flex flex-col gap-5"
                     onSubmit={(e) => handleSubmit(e, close)}
                   >
+                    {/* Avatar Upload */}
                     <div className="flex flex-col items-center gap-3">
                       <label
                         htmlFor="dialog-avatar"
@@ -182,6 +184,22 @@ export default function EditProfileDialog({ user }: EditProfileDialogProps) {
                       <Label className={labelClass}>Name</Label>
                       <Input
                         placeholder="Your name"
+                        className={fieldClass}
+                      />
+                      <FieldError className="text-xs text-[#D64545]" />
+                    </TextField>
+
+                    {/* Phone Number Input */}
+                    <TextField
+                      name="phone"
+                      type="tel"
+                      value={phone}
+                      onChange={setPhone}
+                      className="flex flex-col gap-1.5"
+                    >
+                      <Label className={labelClass}>Phone Number</Label>
+                      <Input
+                        placeholder="e.g., +1234567890"
                         className={fieldClass}
                       />
                       <FieldError className="text-xs text-[#D64545]" />

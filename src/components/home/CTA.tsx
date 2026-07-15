@@ -31,7 +31,7 @@ export default function CTA() {
           <Link href="/menu">
             <Button
               size="lg"
-              className="border-text px-8 font-semibold text-text"
+              className="border-text px-8 font-semibold text-text bg-background"
             >
               Browse menu
             </Button>
