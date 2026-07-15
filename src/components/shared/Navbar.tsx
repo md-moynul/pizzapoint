@@ -1,5 +1,5 @@
 "use client";
-import { sessionsClient } from "@/lib/sessions/clinetSide";
+
 
 import { useState, useEffect, useRef } from "react";
 import { Avatar, Button } from "@heroui/react";
@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
+import { sessionsClient } from "@/lib/sessions/clinetSide";
 
 interface navItem {
   label: string;
@@ -19,7 +20,7 @@ interface CustomUser {
   name?: string | null;
   email?: string | null;
   image?: string | null;
-  role?: string; // admin, user ইত্যাদি
+  role?: string; 
 }
 
 const baseNavItems: navItem[] = [
@@ -32,15 +33,15 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  
+
   const user = sessionsClient().session?.user as CustomUser | undefined;
 
-  
+
   const navItems: navItem[] = [
     ...baseNavItems,
-    ...(user && user.role !== "admin" ? [{ label: "Cart", href: "/dashboard/user/cart" },{ label: "profile", href: "/dashboard/profile" }] : []),
-    ...(user?.role === "admin" 
-      ? [{ label: "Dashboard", href: `/dashboard/${user.role}` },{ label: "profile", href: "/dashboard/profile" }] 
+    ...(user && user.role !== "admin" ? [{ label: "Cart", href: "/dashboard/user/cart" }, { label: "profile", href: "/dashboard/profile" }] : []),
+    ...(user?.role === "admin"
+      ? [{ label: "Dashboard", href: `/dashboard/${user.role}` }, { label: "profile", href: "/dashboard/profile" }]
       : []
     ),
   ];
@@ -64,7 +65,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     await authClient.signOut();
     setIsProfileOpen(false);
     redirect('/');
@@ -90,8 +91,7 @@ export default function Navbar() {
 
           {isProfileOpen && (
             <div className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-xl border border-border bg-surface shadow-lg">
-              {/* প্রোফাইল ড্রপডাউনেও ড্যাশবোর্ড লিঙ্কটি কেবল অ্যাডমিন দেখবে */}
-              {user?.role === "admin" && (
+              {user?.role === "admin" ? (
                 <Link
                   href={`/dashboard/${user.role}`}
                   onClick={() => setIsProfileOpen(false)}
@@ -100,7 +100,18 @@ export default function Navbar() {
                   <LayoutHeader className="h-4 w-4" />
                   Dashboard
                 </Link>
-              )}
+              ) :
+                (
+                  <Link
+                    href={`/dashboard/user/cart`}
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-text hover:bg-bg"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    Cart
+                  </Link>
+                )
+              }
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-primary hover:bg-bg"
@@ -163,7 +174,6 @@ export default function Navbar() {
 
         {/* Right content */}
         <div className="hidden items-center gap-3 md:flex">
-          {/* Cart Button: এটি শুধুমাত্র তখনই দেখাবে যখন ইউজার লগইন করা থাকবে এবং সে admin হবে না (অর্থাৎ সাধারণ কাস্টমার) */}
           {user?.role !== "admin" && (
             <button
               aria-label="Cart"
