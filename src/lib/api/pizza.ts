@@ -30,3 +30,6 @@ export const getPizzaById = async (id: string) => {
 export const getLovedPizzas = async (page: number = 1, limit: number = 4) => {
   return serverFetch(`/api/pizza/loved?page=${page}&limit=${limit}`);
 };
+export const getAllPizzaWithoutPagination = async () => {
+  return serverFetch(`/api/pizza/all`);
+};

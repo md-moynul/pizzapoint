@@ -43,6 +43,7 @@ export default function DashboardSidebar({ user, cartCount = 0 }: DashboardSideb
 
     const adminNavItems: NavItem[] = [
         { icon: LayoutCellsLarge, label: "Overview", href: "/dashboard/admin" },
+        { icon: Person, label: "Users", href: "/dashboard/admin/users" },
         // { icon: ShoppingCart, label: "Orders", href: "/dashboard/admin/orders" },
         // { icon: Box, label: "Inventory", href: "/dashboard/admin/inventory" },
         { icon: Plus, label: "Add Item", href: "/dashboard/admin/items/add" },

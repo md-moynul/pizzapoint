@@ -36,3 +36,17 @@ export const serverFetch = async (path :string) => {
     const res = await fetch(`${baseUrl}${path}`);
     return res.json();
 };
+export const  protectedFetch = async (path: string, token: string) => {
+    const res = await fetch(`${baseUrl}${path}`,{
+        headers: {
+            'authorization': token
+        },
+    });
+    if (res.status === 401) {
+        redirect('/auth/login');
+    }
+    if (res.status === 403) {
+        redirect('/unauthorized');
+    }
+    return res.json();
+};
