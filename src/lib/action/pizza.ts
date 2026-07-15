@@ -13,3 +13,8 @@ export const deletePizza = async (id: string) => {
 
     return protectedMutation(`/api/pizza/${id}`, null, token ? token : '','DELETE')
 }
+export const updatePizza = async (id: string, data: object) => {
+    const token = await getClientToken()
+
+    return protectedMutation(`/api/pizza/${id}`, data, token ? token : '','PATCH')
+}
