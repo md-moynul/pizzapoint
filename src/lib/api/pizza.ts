@@ -1,8 +1,15 @@
 import { serverFetch } from "../core/server"
 
 
-export const getAllPizzas = async () => {
-   return serverFetch('/api/pizza')
+interface GetAllPizzasArgs {
+  q?: string;
+  category?: string;
+  minPrice?: string;
+  maxPrice?: string;
+}
+
+export const getAllPizzas = async ({ q, category, minPrice, maxPrice }: GetAllPizzasArgs) => {
+  return serverFetch(`/api/pizza?q=${q ?? ''}&category=${category ?? ''}&minPrice=${minPrice ?? ''}&maxPrice=${maxPrice ?? ''}`)
 }
 
 export const getPizzaById = async (id: string) => {
