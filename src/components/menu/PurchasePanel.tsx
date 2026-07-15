@@ -65,6 +65,7 @@ export default function PurchasePanel({ pizza ,userId }: { pizza: Pizza , userId
             const res = await addToCart(cartData);
             if (res.success) {
                 toast.success("Pizza added to cart successfully")
+                window.dispatchEvent(new Event("cart-updated"));
             } else {
                 toast.error("Failed to add pizza to cart")
             }

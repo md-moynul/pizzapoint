@@ -8,7 +8,7 @@ interface GetAllPizzasArgs {
   maxPrice?: string;
 }
 
-export const getAllPizzas = async ({ q, category, minPrice, maxPrice }: GetAllPizzasArgs) => {
+export const getAllPizzas = async ({ q, category, minPrice, maxPrice }: GetAllPizzasArgs = {}) => {
   return serverFetch(`/api/pizza?q=${q ?? ''}&category=${category ?? ''}&minPrice=${minPrice ?? ''}&maxPrice=${maxPrice ?? ''}`)
 }
 

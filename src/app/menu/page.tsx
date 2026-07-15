@@ -15,8 +15,6 @@ interface MenuPageProps {
 export default async function MenuPage({ searchParams }: MenuPageProps) {
   const { q, category, minPrice, maxPrice } = await searchParams;
 
-  // TODO: make sure getAllPizzas accepts and forwards these as query params
-  // e.g. GET /pizzas?q=...&category=...&minPrice=...&maxPrice=...
   const pizzas: Pizza[] = await getAllPizzas({
     q,
     category,

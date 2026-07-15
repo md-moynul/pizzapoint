@@ -130,6 +130,7 @@ const CartClient = ({ initialCart, userId }: CartClientProps) => {
         } : prev);
 
         toast.success(`Quantity updated successfully`);
+        window.dispatchEvent(new Event("cart-updated"));
       } else {
         throw new Error(data?.message || "Failed to update quantity");
       }
@@ -167,6 +168,7 @@ const CartClient = ({ initialCart, userId }: CartClientProps) => {
       } else {
         toast.success("Item removed from cart successfully")
         setCart(prev => prev ? { ...prev, totalPrice: prev.totalPrice - (removedItem.unitPrice * removedItem.quantity) } : prev);
+        window.dispatchEvent(new Event("cart-updated"));
       }
     } catch (err) {
       console.error("Error removing item:", err);
@@ -190,6 +192,7 @@ const CartClient = ({ initialCart, userId }: CartClientProps) => {
       }
 
       setCart(prev => prev ? { ...prev, items: [], totalPrice: 0 } : prev);
+      window.dispatchEvent(new Event("cart-updated"));
     } catch (err) {
       console.error("Error clearing cart:", err);
       setError("Failed to clear cart. Please try again.");
