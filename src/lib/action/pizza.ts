@@ -7,3 +7,9 @@ export const postPizza = async (data :object) => {
 
     return protectedMutation('/api/pizza/admin/add', data , token ? token : '')
 }
+
+export const deletePizza = async (id: string) => {
+    const token = await getClientToken()
+
+    return protectedMutation(`/api/pizza/${id}`, null, token ? token : '','DELETE')
+}
