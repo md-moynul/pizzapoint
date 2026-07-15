@@ -24,7 +24,7 @@ export const protectedMutation = async (path: string, data :object | null, token
         ...(data && { body: JSON.stringify(data) }),
     });
     if (res.status === 401) {
-        redirect('/auth/login');
+        redirect('/auth/signin');
     }
     if (res.status === 403) {
         redirect('/unauthorized');

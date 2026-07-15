@@ -8,10 +8,10 @@ import {
     LayoutSideContentLeft,
     LayoutCellsLarge,
     ShoppingCart,
-    Box,
+    // Box,
     Plus,
     ListCheck,
-    Bell,
+    // Bell,
     Person,
     ArrowRightFromSquare,
 } from "@gravity-ui/icons";
@@ -43,11 +43,11 @@ export default function DashboardSidebar({ user, cartCount = 0 }: DashboardSideb
 
     const adminNavItems: NavItem[] = [
         { icon: LayoutCellsLarge, label: "Overview", href: "/dashboard/admin" },
-        { icon: ShoppingCart, label: "Orders", href: "/dashboard/admin/orders" },
-        { icon: Box, label: "Inventory", href: "/dashboard/admin/inventory" },
+        // { icon: ShoppingCart, label: "Orders", href: "/dashboard/admin/orders" },
+        // { icon: Box, label: "Inventory", href: "/dashboard/admin/inventory" },
         { icon: Plus, label: "Add Item", href: "/dashboard/admin/items/add" },
         { icon: ListCheck, label: "Manage Items", href: "/dashboard/admin/items" },
-        { icon: Bell, label: "Stock Alerts", href: "/dashboard/admin/alerts" },
+        // { icon: Bell, label: "Stock Alerts", href: "/dashboard/admin/alerts" },
         { icon: Person, label: "Profile", href: "/dashboard/profile" },
     ];
 
