@@ -338,7 +338,7 @@ const CartClient = ({ initialCart, userId }: CartClientProps) => {
                         <button
                           type="button"
                           onClick={() => updateQuantity(item, -1)}
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-50"
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors disabled:opacity-50 cursor-pointer"
                           aria-label="Decrease quantity"
                           disabled={item.quantity <= 1}
                         >
@@ -350,7 +350,7 @@ const CartClient = ({ initialCart, userId }: CartClientProps) => {
                         <button
                           type="button"
                           onClick={() => updateQuantity(item, 1)}
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 cursor-pointer hover:bg-gray-100 hover:text-gray-700 transition-colors"
                           aria-label="Increase quantity"
                         >
                           <Plus width={14} height={14} />
