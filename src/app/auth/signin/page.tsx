@@ -7,5 +7,5 @@ export const metadata = constructMetadata({
 });
 
 export default function Page() {
-  return <SignInClient />;
+  return <SignInClient /> ;
 }
