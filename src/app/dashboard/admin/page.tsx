@@ -3,6 +3,7 @@ import { constructMetadata } from '@/lib/metadata';
 import OverviewBarChart from "@/components/dashboard/OverviewBarChart";
 import { getAllPizzaWithoutPagination } from "@/lib/api/pizza";
 import { getUser } from "@/lib/api/user";
+import { getAllOrders } from "@/lib/api/orders";
 import { Person, ShoppingCart, CircleDollar, Circle } from "@gravity-ui/icons";
 
 function StatCard({
@@ -27,35 +28,34 @@ function StatCard({
   );
 }
 
-import { getAllOrders } from "@/lib/api/orders";
-import { Metadata } from 'next';
-
-
 export const metadata = constructMetadata({
   title: 'Dashboard | Admin | PizzaPoint',
   description: 'PizzaPoint - Fresh and Delicious Pizza',
 });
 
-
 const AdminOverviewPage = async () => {
   // Fetching existing APIs safely
-  const users = await getUser().catch(() => []);
+  const usersRes = await getUser().catch(() => ({ data: [], pagination: { totalItems: 0 } }));
   const pizzas = await getAllPizzaWithoutPagination().catch(() => []);
   const ordersRes = await getAllOrders().catch(() => ({ totalOrders: 0, totalRevenue: 0 }));
 
-  const totalOrders = ordersRes?.totalOrders ?? 0;
+  const totalUsers =
+    usersRes?.pagination?.totalItems ??
+    (Array.isArray(usersRes) ? usersRes.length : (usersRes?.data?.length ?? 0));
+  const totalPizzas = Array.isArray(pizzas) ? pizzas.length : (pizzas?.data?.length ?? 0);
+  const totalOrders = ordersRes?.totalOrders ?? (Array.isArray(ordersRes?.data) ? ordersRes.data.length : 0);
   const totalRevenue = ordersRes?.totalRevenue ?? 0;
 
   const cards = [
     {
       icon: Person,
       label: "Total Users",
-      value: users?.length ?? 0,
+      value: totalUsers,
     },
     {
       icon: Circle,
       label: "Total Pizzas",
-      value: pizzas?.length ?? 0,
+      value: totalPizzas,
     },
     {
       icon: ShoppingCart,
