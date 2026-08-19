@@ -18,8 +18,8 @@ export const getAllOrders = async ({
   q,
   deliveryStatus,
   status,
-  page,
-  limit,
+  page = 1,
+  limit = 8,
 }: GetAllOrdersArgs = {}) => {
   const sp = new URLSearchParams();
   if (q) sp.set("q", q);
