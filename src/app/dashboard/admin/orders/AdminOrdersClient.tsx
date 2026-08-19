@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ShoppingBag } from '@gravity-ui/icons';
 import { updateOrderStatus } from '@/lib/action/orders';
 import { toast } from 'react-toastify';
+import AdminOrdersFilter from '@/components/dashboard/AdminOrdersFilter';
 
 interface OrderItem {
   description?: string;
@@ -26,6 +27,15 @@ interface Order {
   items?: OrderItem[];
 }
 
+interface AdminOrdersClientProps {
+  initialOrders: Order[];
+  totalOrders?: number;
+  activeCount?: number;
+  deliveredCount?: number;
+  initialSearch?: string;
+  initialDeliveryStatus?: string;
+}
+
 function getStatusRank(status?: string): number {
   const norm = (status || '').toLowerCase().trim();
   if (norm === 'delivered') return 3;
@@ -33,9 +43,51 @@ function getStatusRank(status?: string): number {
   return 1; // Default to Cooking (1)
 }
 
-export default function AdminOrdersClient({ initialOrders }: { initialOrders: Order[] }) {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+function sortOrders(ordersList: Order[]): Order[] {
+  return [...ordersList].sort((a, b) => {
+    const aDelivered = (a.deliveryStatus || '').toLowerCase().trim() === 'delivered';
+    const bDelivered = (b.deliveryStatus || '').toLowerCase().trim() === 'delivered';
+
+    // 1. Non-delivered (active) orders come first
+    if (!aDelivered && bDelivered) return -1;
+    if (aDelivered && !bDelivered) return 1;
+
+    // 2. Within each group, sort by createdAt descending (newest first)
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bTime - aTime;
+  });
+}
+
+export default function AdminOrdersClient({
+  initialOrders,
+  totalOrders,
+  activeCount: propActiveCount,
+  deliveredCount: propDeliveredCount,
+  initialSearch = '',
+  initialDeliveryStatus = 'all',
+}: AdminOrdersClientProps) {
+  const [orders, setOrders] = useState<Order[]>(() => sortOrders(initialOrders));
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Sync state when initialOrders change (on server-side filter navigation)
+  useEffect(() => {
+    setOrders(sortOrders(initialOrders));
+  }, [initialOrders]);
+
+  const activeCount =
+    propActiveCount !== undefined
+      ? propActiveCount
+      : orders.filter((o) => (o.deliveryStatus || '').toLowerCase().trim() !== 'delivered').length;
+
+  const deliveredCount =
+    propDeliveredCount !== undefined
+      ? propDeliveredCount
+      : orders.filter((o) => (o.deliveryStatus || '').toLowerCase().trim() === 'delivered').length;
+
+  const isFiltering = Boolean(
+    initialSearch || (initialDeliveryStatus && initialDeliveryStatus !== 'all')
+  );
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     const targetOrder = orders.find((o) => o._id === orderId);
@@ -43,16 +95,21 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
     const newRank = getStatusRank(newStatus);
 
     if (newRank < currentRank) {
-      toast.error(`Cannot revert delivery status backwards from "${targetOrder?.deliveryStatus || 'Cooking'}" to "${newStatus}"`);
+      toast.error(
+        `Cannot revert delivery status backwards from "${targetOrder?.deliveryStatus || 'Cooking'}" to "${newStatus}"`
+      );
       return;
     }
 
     setUpdatingId(orderId);
 
-    // Optimistic UI update
-    setOrders((prev) =>
-      prev.map((o) => (o._id === orderId ? { ...o, deliveryStatus: newStatus } : o))
-    );
+    // Optimistic UI update with automatic re-sorting
+    setOrders((prev) => {
+      const updated = prev.map((o) =>
+        o._id === orderId ? { ...o, deliveryStatus: newStatus } : o
+      );
+      return sortOrders(updated);
+    });
 
     try {
       const res = await updateOrderStatus(orderId, newStatus);
@@ -71,24 +128,56 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
 
   return (
     <div className="flex-1 px-6 py-8 md:px-10">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Orders & Delivery Management</h1>
-          <p className="mt-1 text-sm text-gray-500">Update customer delivery status (Cooking ➔ On Delivery ➔ Delivered).</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Update customer delivery status (Cooking ➔ On Delivery ➔ Delivered).
+          </p>
         </div>
-        <div className="rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-          Total Orders: {orders.length}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-1.5 text-xs font-semibold text-amber-800 shadow-xs">
+            ⏳ Active: {activeCount}
+          </div>
+          <div className="rounded-xl bg-green-50 border border-green-200 px-3.5 py-1.5 text-xs font-semibold text-green-800 shadow-xs">
+            🎉 Delivered: {deliveredCount}
+          </div>
+          <div className="rounded-xl bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary">
+            Total: {totalOrders ?? orders.length}
+          </div>
         </div>
       </div>
 
+      {/* Server-side Search & Delivery Status Filter Bar */}
+      <div className="mb-6">
+        <AdminOrdersFilter
+          initialSearch={initialSearch}
+          initialDeliveryStatus={initialDeliveryStatus}
+        />
+      </div>
+
       {orders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center bg-white">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400 mb-3">
-            <ShoppingBag width={24} height={24} />
+        isFiltering ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center bg-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400 mb-3">
+              <ShoppingBag width={24} height={24} />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900">No matching orders found</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Try adjusting your search terms or delivery status filter.
+            </p>
           </div>
-          <h3 className="text-base font-semibold text-gray-900">No orders yet</h3>
-          <p className="text-xs text-gray-500 mt-1">Orders will appear here automatically when customers complete checkout.</p>
-        </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center bg-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400 mb-3">
+              <ShoppingBag width={24} height={24} />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900">No orders yet</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              Orders will appear here automatically when customers complete checkout.
+            </p>
+          </div>
+        )
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-xs">
           <table className="w-full text-left text-sm text-gray-600">
@@ -118,14 +207,17 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                     </td>
                     <td className="px-6 py-4 text-xs">
                       <p className="font-medium text-gray-800">{order.customerPhone || 'N/A'}</p>
-                      <p className="text-gray-500 line-clamp-1 max-w-xs">{order.customerAddress || 'N/A'}</p>
+                      <p className="text-gray-500 line-clamp-1 max-w-xs">
+                        {order.customerAddress || 'N/A'}
+                      </p>
                     </td>
                     <td className="px-6 py-4 text-xs">
                       {Array.isArray(order.items) && order.items.length > 0 ? (
                         <div className="flex flex-col gap-1">
                           {order.items.map((item, idx) => (
                             <span key={idx} className="text-gray-700">
-                              <span className="font-semibold text-gray-900">{item.quantity}x</span> {item.name || item.description || 'Pizza Item'}
+                              <span className="font-semibold text-gray-900">{item.quantity}x</span>{' '}
+                              {item.name || item.description || 'Pizza Item'}
                             </span>
                           ))}
                         </div>
@@ -145,11 +237,10 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                         className={`rounded-xl px-3 py-1.5 text-xs font-bold border outline-hidden transition-all ${
                           currentRank === 3
                             ? 'cursor-not-allowed bg-green-100 border-green-300 text-green-800 opacity-90'
-                            : 'cursor-pointer ' + (
-                                status === 'On Delivery'
-                                  ? 'bg-blue-50 border-blue-300 text-blue-800'
-                                  : 'bg-amber-50 border-amber-300 text-amber-800'
-                              )
+                            : 'cursor-pointer ' +
+                              (status === 'On Delivery'
+                                ? 'bg-blue-50 border-blue-300 text-blue-800'
+                                : 'bg-amber-50 border-amber-300 text-amber-800')
                         }`}
                       >
                         <option value="Cooking" disabled={currentRank > 1}>
@@ -158,9 +249,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Or
                         <option value="On Delivery" disabled={currentRank > 2}>
                           🛵 On Delivery
                         </option>
-                        <option value="Delivered">
-                          🎉 Delivered
-                        </option>
+                        <option value="Delivered">🎉 Delivered</option>
                       </select>
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-500">
