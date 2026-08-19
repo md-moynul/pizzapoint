@@ -1,7 +1,7 @@
 // components/dashboard/ItemsTable.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Table, Button, AlertDialog } from "@heroui/react";
@@ -25,6 +25,11 @@ export default function ItemsTable({
 }) {
     const [pizzas, setPizzas] = useState<Pizza[]>(initialPizzas);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    // Sync pizzas when initialPizzas prop updates (e.g. on pagination navigation)
+    useEffect(() => {
+        setPizzas(initialPizzas);
+    }, [initialPizzas]);
 
     // Track the specific pizza being considered for deletion
     const [pizzaToDelete, setPizzaToDelete] = useState<Pizza | null>(null);

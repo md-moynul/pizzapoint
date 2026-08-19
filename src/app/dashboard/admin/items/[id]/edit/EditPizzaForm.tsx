@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/dashboard/admin/items/[id]/edit/EditPizzaForm.tsx
 "use client";
 

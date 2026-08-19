@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, TrashBin, Pencil, Box, Check } from '@gravity-ui/icons';
 import { deleteInventoryItem, updateInventoryItem } from '@/lib/action/inventory';
 import { toast } from 'react-toastify';
+import AdminInventoryFilter from '@/components/dashboard/AdminInventoryFilter';
 
 export interface InventoryItem {
   _id: string;
@@ -15,7 +16,21 @@ export interface InventoryItem {
   minThreshold: number;
 }
 
-export default function InventoryClient({ initialItems }: { initialItems: InventoryItem[] }) {
+interface InventoryClientProps {
+  initialItems: InventoryItem[];
+  totalItems?: number;
+  initialSearch?: string;
+  initialCategory?: string;
+  initialStatus?: string;
+}
+
+export default function InventoryClient({
+  initialItems,
+  totalItems,
+  initialSearch = '',
+  initialCategory = 'all',
+  initialStatus = 'all',
+}: InventoryClientProps) {
   const [items, setItems] = useState<InventoryItem[]>(initialItems);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -23,6 +38,18 @@ export default function InventoryClient({ initialItems }: { initialItems: Invent
   const [editQty, setEditQty] = useState<number>(0);
   const [bulkIncreaseAmount, setBulkIncreaseAmount] = useState<number>(10);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  // Sync state when initialItems change (pagination / search / filter navigation)
+  useEffect(() => {
+    setItems(initialItems);
+    setSelectedIds([]);
+  }, [initialItems]);
+
+  const isFiltering = Boolean(
+    initialSearch ||
+    (initialCategory && initialCategory !== 'all') ||
+    (initialStatus && initialStatus !== 'all')
+  );
 
   const toggleSelectAll = () => {
     if (selectedIds.length === items.length) {
@@ -122,6 +149,7 @@ export default function InventoryClient({ initialItems }: { initialItems: Invent
         toast.error('Failed to delete item');
       }
     } catch (e) {
+      console.error(e);
       toast.error('Error deleting item');
     } finally {
       setDeletingId(null);
@@ -141,6 +169,7 @@ export default function InventoryClient({ initialItems }: { initialItems: Invent
         toast.error('Failed to update quantity');
       }
     } catch (e) {
+      console.error(e);
       toast.error('Error updating item');
     }
   };
@@ -154,13 +183,29 @@ export default function InventoryClient({ initialItems }: { initialItems: Invent
             Select items to bulk increase stock quantity / weight or manage individual ingredients.
           </p>
         </div>
-        <Link
-          href="/dashboard/admin/inventory/add"
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 transition-colors shadow-xs"
-        >
-          <Plus width={18} height={18} />
-          Add Making Item
-        </Link>
+        <div className="flex items-center gap-3">
+          {typeof totalItems === 'number' && (
+            <div className="rounded-xl bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+              Total Ingredients: {totalItems}
+            </div>
+          )}
+          <Link
+            href="/dashboard/admin/inventory/add"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 transition-colors shadow-xs"
+          >
+            <Plus width={18} height={18} />
+            Add Making Item
+          </Link>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="mb-6">
+        <AdminInventoryFilter
+          initialSearch={initialSearch}
+          initialCategory={initialCategory}
+          initialStatus={initialStatus}
+        />
       </div>
 
       {/* Bulk Action Controls Banner */}
@@ -207,22 +252,34 @@ export default function InventoryClient({ initialItems }: { initialItems: Invent
       )}
 
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center bg-white">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
-            <Box width={24} height={24} />
+        isFiltering ? (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center bg-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400 mb-3">
+              <Box width={24} height={24} />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900">No ingredients found matching your filters</h3>
+            <p className="text-xs text-gray-500 mt-1 max-w-sm">
+              Try adjusting your search query, category, or stock status filter.
+            </p>
           </div>
-          <h3 className="text-base font-semibold text-gray-900">No pizza making items added yet</h3>
-          <p className="text-xs text-gray-500 mt-1 max-w-sm">
-            Add ingredients like Mozzarella Cheese, Flour, Tomato Sauce, and Toppings to track stock.
-          </p>
-          <Link
-            href="/dashboard/admin/inventory/add"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white"
-          >
-            <Plus width={16} height={16} />
-            Add First Ingredient
-          </Link>
-        </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 py-16 text-center bg-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
+              <Box width={24} height={24} />
+            </div>
+            <h3 className="text-base font-semibold text-gray-900">No pizza making items added yet</h3>
+            <p className="text-xs text-gray-500 mt-1 max-w-sm">
+              Add ingredients like Mozzarella Cheese, Flour, Tomato Sauce, and Toppings to track stock.
+            </p>
+            <Link
+              href="/dashboard/admin/inventory/add"
+              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white"
+            >
+              <Plus width={16} height={16} />
+              Add First Ingredient
+            </Link>
+          </div>
+        )
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-xs">
           <table className="w-full text-left text-sm text-gray-600">

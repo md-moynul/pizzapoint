@@ -63,26 +63,37 @@ export default function Navbar() {
   const [cartCount, setCartCount] = useState<number>(0);
   const user = sessionsClient().session?.user as CustomUser | undefined;
 
+  const isLoggedInUser = !!user && user.role !== "admin";
+  const isAdmin = user?.role === "admin";
+
   // Base navigation items with icons & priority definitions
   const navItems: NavItem[] = [
     { label: "Menu", href: "/menu", icon: ListCheck },
-    {
-      label: "Build Pizza",
-      href: "/dashboard/user/build",
-      icon: Plus,
-      isPriority: true,
-    },
     { label: "About", href: "/about", icon: CircleCheckFill },
     { label: "Contact Us", href: "/contact", icon: Envelope },
-    ...(user && user.role !== "admin"
+    // Logged-in, non-admin users only
+    ...(isLoggedInUser
       ? [
+          {
+            label: "Build Pizza",
+            href: "/dashboard/user/build",
+            icon: Plus,
+            isPriority: true,
+          },
+          { label: "My Orders", href: "/dashboard/user/orders", icon: Clock },
           { label: "Cart", href: "/dashboard/user/cart", icon: ShoppingCart },
           { label: "Profile", href: "/dashboard/profile", icon: Person },
         ]
       : []),
-    ...(user?.role === "admin"
+    // Admin only
+    ...(isAdmin
       ? [
-          { label: "Dashboard", href: `/dashboard/${user.role}`, icon: LayoutHeader, isPriority: true },
+          {
+            label: "Dashboard",
+            href: `/dashboard/${user.role}`,
+            icon: LayoutHeader,
+            isPriority: true,
+          },
           { label: "Profile", href: "/dashboard/profile", icon: Person },
         ]
       : []),
@@ -169,7 +180,7 @@ export default function Navbar() {
                 <p className="text-[11px] text-text-muted truncate">{user.email}</p>
               </div>
 
-              {user?.role === "admin" ? (
+              {isAdmin ? (
                 <Link
                   href={`/dashboard/${user.role}`}
                   onClick={() => setIsProfileOpen(false)}
@@ -286,7 +297,7 @@ export default function Navbar() {
 
         {/* Right Content / Quick Actions */}
         <div className="hidden items-center gap-3 md:flex">
-          {user?.role !== "admin" && (
+          {!isAdmin && (
             <Link href="/dashboard/user/cart" aria-label="View Cart">
               <button
                 className="relative rounded-full border border-border p-2 text-text transition-colors hover:border-primary hover:text-primary hover:bg-surface"

@@ -3,8 +3,9 @@
 import { Button, Chip } from "@heroui/react";
 import { MapPin, Star, Clock, ArrowRight } from "@gravity-ui/icons";
 import Image from "next/image";
+import Link from "next/link";
 
-const buildSteps : string[] = ["Base", "Sauce", "Cheese", "Veggies"];
+const buildSteps: string[] = ["Base", "Sauce", "Cheese", "Veggies"];
 
 export default function Hero() {
     return (
@@ -44,12 +45,14 @@ export default function Hero() {
                     </p>
 
                     <div className="mt-8 flex flex-wrap items-center gap-4">
-                        <Button
-                            size="lg"
-                            className="bg-primary px-8 font-semibold text-white"
-                        >
-                            Start building <ArrowRight className="h-4 w-4" />
-                        </Button>
+                        <Link href={'/dashboard/user/build'}>
+                            <Button
+                                size="lg"
+                                className="bg-primary px-8 font-semibold text-white"
+                            >
+                                Start building <ArrowRight className="h-4 w-4" />
+                            </Button>
+                        </Link>
                         <Button
                             size="lg"
 
@@ -63,7 +66,7 @@ export default function Hero() {
                     <div className="mt-10 flex flex-wrap items-center gap-2 font-mono text-xs text-text-muted">
                         {buildSteps.map((step, i) => (
                             <div key={step} className="flex items-center gap-2">
-                                <Chip size="sm"  className="bg-surface text-text">
+                                <Chip size="sm" className="bg-surface text-text">
                                     0{i + 1} · {step}
                                 </Chip>
                                 {i < buildSteps.length - 1 && <span>→</span>}
